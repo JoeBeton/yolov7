@@ -536,7 +536,6 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         hyp = self.hyp
         mosaic = self.mosaic and random.random() < hyp['mosaic']
-        print(f"mosaic: {mosaic}")
         if mosaic:
             # Load mosaic
             if random.random() < 0.8:
@@ -544,7 +543,6 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             else:
                 img, labels = load_mosaic9(self, index)
             shapes = None
-            print(f"shape after mosaic: {img.shape}")
 
             # MixUp https://arxiv.org/pdf/1710.09412.pdf
             if random.random() < hyp['mixup']:
@@ -555,12 +553,10 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 r = np.random.beta(8.0, 8.0)  # mixup ratio, alpha=beta=8.0
                 img = (img * r + img2 * (1 - r)).astype(np.uint8)
                 labels = np.concatenate((labels, labels2), 0)
-            print(f"shape after mixup: {img.shape}")
 
         else:
             # Load image
             img, (h0, w0), (h, w) = load_image(self, index)
-            print(f"shape after standard loading: {img.shape}")
 
             # Letterbox
             shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
@@ -628,11 +624,8 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         # Convert
         #img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-        print(f"shape pre transpose: {img.shape}")
         img = img.transpose(2, 0, 1)
-        print(f"shape after transpose: {img.shape}")
         img = np.ascontiguousarray(img)
-        quit()
 
         return torch.from_numpy(img), labels_out, self.img_files[index], shapes
 
@@ -678,7 +671,6 @@ def load_image(self, index):
         path = self.img_files[index]
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)[..., np.newaxis]  # BGR
         assert img is not None, 'Image Not Found ' + path
-        print(f"shape at parsing: {img.shape}")
         h0, w0 = img.shape[:2]  # orig hw
         r = self.img_size / max(h0, w0)  # resize image to img_size
         if r != 1:  # always resize down, only resize up if training with augmentation
@@ -741,7 +733,6 @@ def load_mosaic(self, index):
             x1b, y1b, x2b, y2b = 0, 0, min(w, x2a - x1a), min(y2a - y1a, h)
 
         img4[y1a:y2a, x1a:x2a] = img[y1b:y2b, x1b:x2b]  # img4[ymin:ymax, xmin:xmax]
-        print(f"mosaic initial size: {img4.shape}")
         padw = x1a - x1b
         padh = y1a - y1b
 
@@ -763,7 +754,6 @@ def load_mosaic(self, index):
     #img4, labels4, segments4 = remove_background(img4, labels4, segments4)
     #sample_segments(img4, labels4, segments4, probability=self.hyp['copy_paste'])
     img4, labels4, segments4 = copy_paste(img4, labels4, segments4, probability=self.hyp['copy_paste'])
-    print(f"mosaic after copy paste: {img4.shape}")
     img4, labels4 = random_perspective(img4, labels4, segments4,
                                        degrees=self.hyp['degrees'],
                                        translate=self.hyp['translate'],
@@ -771,7 +761,6 @@ def load_mosaic(self, index):
                                        shear=self.hyp['shear'],
                                        perspective=self.hyp['perspective'],
                                        border=self.mosaic_border)  # border to remove
-    print(f"mosaic after random_perspective: {img4.shape}")
     return img4, labels4
 
 
@@ -1060,7 +1049,7 @@ def random_perspective(img, targets=(), segments=(), degrees=10, translate=.1, s
     T = np.eye(3)
     T[0, 2] = random.uniform(0.5 - translate, 0.5 + translate) * width  # x translation (pixels)
     T[1, 2] = random.uniform(0.5 - translate, 0.5 + translate) * height  # y translation (pixels)
-    print(f"image shape before cv2 operations: {img.shape}" )
+
     # Combined rotation matrix
     M = T @ S @ R @ P @ C  # order of operations (right to left) is IMPORTANT
     if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # image changed
@@ -1068,7 +1057,6 @@ def random_perspective(img, targets=(), segments=(), degrees=10, translate=.1, s
             img = cv2.warpPerspective(img, M, dsize=(width, height), borderValue=(114, 114, 114))[..., np.newaxis]
         else:  # affine
             img = cv2.warpAffine(img, M[:2], dsize=(width, height), borderValue=(114, 114, 114))[..., np.newaxis]
-    print(f"image shape after cv2 operations: {img.shape}" )
 
     # Visualize
     # import matplotlib.pyplot as plt
