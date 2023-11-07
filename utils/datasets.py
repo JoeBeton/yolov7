@@ -674,6 +674,7 @@ def load_image(self, index):
         path = self.img_files[index]
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)  # BGR
         assert img is not None, 'Image Not Found ' + path
+        img = np.expand_dims(img, 0)
         h0, w0 = img.shape[:2]  # orig hw
         r = self.img_size / max(h0, w0)  # resize image to img_size
         if r != 1:  # always resize down, only resize up if training with augmentation
