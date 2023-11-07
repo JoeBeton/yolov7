@@ -1060,7 +1060,7 @@ def random_perspective(img, targets=(), segments=(), degrees=10, translate=.1, s
     T = np.eye(3)
     T[0, 2] = random.uniform(0.5 - translate, 0.5 + translate) * width  # x translation (pixels)
     T[1, 2] = random.uniform(0.5 - translate, 0.5 + translate) * height  # y translation (pixels)
-
+    print(f"image shape before cv2 operations: {img.shape}" )
     # Combined rotation matrix
     M = T @ S @ R @ P @ C  # order of operations (right to left) is IMPORTANT
     if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # image changed
@@ -1068,6 +1068,7 @@ def random_perspective(img, targets=(), segments=(), degrees=10, translate=.1, s
             img = cv2.warpPerspective(img, M, dsize=(width, height), borderValue=(114, 114, 114))
         else:  # affine
             img = cv2.warpAffine(img, M[:2], dsize=(width, height), borderValue=(114, 114, 114))
+    print(f"image shape after cv2 operations: {img.shape}" )
 
     # Visualize
     # import matplotlib.pyplot as plt
