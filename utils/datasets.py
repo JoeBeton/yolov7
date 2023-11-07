@@ -624,9 +624,9 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         # Convert
         #img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-        print(img.shape)
+        print(f"shape pre transpose: {img.shape}")
         img = img.transpose(2, 0, 1)
-        print(img.shape)
+        print(f"shape after transpose: {img.shape}")
         img = np.ascontiguousarray(img)
         quit()
 
@@ -674,7 +674,7 @@ def load_image(self, index):
         path = self.img_files[index]
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)[..., np.newaxis]  # BGR
         assert img is not None, 'Image Not Found ' + path
-        print(img.shape)
+        print(f"shape at parsing: {img.shape}")
         h0, w0 = img.shape[:2]  # orig hw
         r = self.img_size / max(h0, w0)  # resize image to img_size
         if r != 1:  # always resize down, only resize up if training with augmentation
