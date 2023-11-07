@@ -536,6 +536,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         hyp = self.hyp
         mosaic = self.mosaic and random.random() < hyp['mosaic']
+        print(f"mosaic: {mosaic}")
         if mosaic:
             # Load mosaic
             if random.random() < 0.8:
@@ -543,6 +544,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             else:
                 img, labels = load_mosaic9(self, index)
             shapes = None
+            print(f"shape after mosaic: {img.shape}")
 
             # MixUp https://arxiv.org/pdf/1710.09412.pdf
             if random.random() < hyp['mixup']:
@@ -553,10 +555,12 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 r = np.random.beta(8.0, 8.0)  # mixup ratio, alpha=beta=8.0
                 img = (img * r + img2 * (1 - r)).astype(np.uint8)
                 labels = np.concatenate((labels, labels2), 0)
+            print(f"shape after mixup: {img.shape}")
 
         else:
             # Load image
             img, (h0, w0), (h, w) = load_image(self, index)
+            print(f"shape after standard loading: {img.shape}")
 
             # Letterbox
             shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
