@@ -561,6 +561,7 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     # Set DDP variables
+    opt.local_rank = int(os.environ["LOCAL_RANK"])
     opt.world_size = int(os.environ['WORLD_SIZE']) if 'WORLD_SIZE' in os.environ else 1
     opt.global_rank = int(os.environ['RANK']) if 'RANK' in os.environ else -1
     set_logging(opt.global_rank)
